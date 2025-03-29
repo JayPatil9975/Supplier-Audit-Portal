@@ -1,0 +1,97 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head>     
+    <meta charset="UTF-8">     
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">     
+    <title>Supplier Audit Form</title>     
+    <script src="https://cdn.tailwindcss.com"></script> 
+</head> 
+<body class="bg-gray-50 min-h-screen">     
+    <div class="container mx-auto py-8 px-4">
+        <div class="bg-white shadow-xl p-6 md:p-10 rounded-2xl border border-gray-200 max-w-4xl mx-auto">
+            <h2 class="text-3xl font-semibold text-gray-900 mb-6 text-center">Supplier Audit Form</h2>          
+            
+            <!-- Display error messages (if any) -->         
+            <% if (error) { %>         
+            <div class="bg-red-500 text-white p-3 rounded-md mb-4 text-center font-medium">             
+                <%= error %>         
+            </div>         
+            <% } %>
+
+            <div class="mb-6">
+                <p class="text-gray-600">Please rate each audit criteria on a scale of 0-4:</p>
+                <ul class="text-sm text-gray-500 mt-2 ml-4 list-disc">
+                    <li>0 - Not Included</li>
+                    <li>1 - Included, but no execution</li>
+                    <li>2 - Needs Improvement</li>
+                    <li>3 - Good Execution</li>
+                    <li>4 - Innovative, No Recommendations</li>
+                </ul>
+            </div>          
+
+            <form action="/audit/submit" method="POST" enctype="multipart/form-data" class="space-y-8">
+                <!-- Dynamically generate form fields for each question -->
+                <% questions.forEach((question, index) => { %>
+                <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+                    <div class="flex flex-col md:flex-row gap-2 mb-2">
+                        <span class="font-medium text-gray-700 md:w-8"><%= index + 1 %>.</span>
+                        <label class="block text-gray-700 font-medium mb-2 flex-1"><%= question %></label>
+                    </div>
+
+                    <div class="md:ml-8 space-y-2">
+                        <select name="ratings[]" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="0">0 - Not Included</option>
+                            <option value="1">1 - Included, but no execution</option>
+                            <option value="2">2 - Needs Improvement</option>
+                            <option value="3">3 - Good Execution</option>
+                            <option value="4">4 - Innovative, No Recommendations</option>
+                        </select>
+                        
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-500 mb-1">Upload evidence (optional):</p>
+                                <input type="file" name="proof_<%= index %>" class="w-full p-2 border border-gray-300 rounded-lg bg-gray-100 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-white file:bg-blue-600 hover:file:bg-blue-700 transition text-sm" />
+                            </div>
+                            
+                            <div class="flex-1">
+                                <p class="text-sm text-gray-500 mb-1">Remarks:</p>
+                                <textarea name="remarks[]" placeholder="Add remarks (optional)" class="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm h-20"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <% }); %>
+
+                <div class="flex justify-end mt-8">
+                    <button type="reset" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-6 py-3 rounded-lg font-medium transition mr-4">
+                        Reset
+                    </button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                        Submit Audit
+                    </button>
+                </div>
+            </form>     
+        </div>
+
+        <div class="mt-4 text-center text-gray-500 text-sm">
+            <p>All audit submissions are securely stored and available in your reports section.</p>
+        </div>
+    </div>
+
+    <script>
+        // Optional: Add JavaScript to enhance the user experience
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add animation when questions are focused
+            const questionDivs = document.querySelectorAll('form > div');
+            questionDivs.forEach(div => {
+                div.addEventListener('click', function() {
+                    // Remove highlight from all divs
+                    questionDivs.forEach(d => d.classList.remove('ring-2', 'ring-blue-300'));
+                    // Add highlight to clicked div
+                    div.classList.add('ring-2', 'ring-blue-300');
+                });
+            });
+        });
+    </script>
+</body> 
+</html>
