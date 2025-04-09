@@ -1,155 +1,255 @@
-<!DOCTYPE html> 
-<html lang="en"> 
-<head>     
-    <meta charset="UTF-8">     
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">     
-    <title>Supplier Audit Report</title>     
-    <script src="https://cdn.tailwindcss.com"></script> 
-</head> 
-<body class="bg-gray-50 min-h-screen py-8 px-4">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Supplier Audit Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-50 min-h-screen py-8 px-4">
     <div class="container mx-auto">
-        <div class="bg-white shadow-xl p-6 md:p-10 rounded-2xl border border-gray-200 max-w-4xl mx-auto">
-            <!-- Header Section -->
-            <h2 class="text-3xl font-semibold text-gray-900 mb-6 text-center">Supplier Audit Report</h2>
-            
-            <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
-                <div class="space-y-2">
-                    <p class="text-gray-700"><span class="font-medium">Audit ID:</span> <span class="text-gray-600"><%= audit._id %></span></p>
-                    <p class="text-gray-700"><span class="font-medium">Date:</span> <span class="text-gray-600"><%= audit.createdAt.toDateString() %></span></p>
-                </div>
-                
-                <!-- Action Buttons -->
-                <div class="flex gap-3 self-end">
-                    <a href="/dashboard" class="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                        </svg>
-                        Dashboard
-                    </a>
-                    <a href="/audit/report/pdf/<%= audit._id %>" class="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        Download PDF
-                    </a>
-                </div>
-            </div>
-            
-            <!-- Overall Score Card -->
-            <div class="rounded-xl overflow-hidden shadow-md mb-8">
-                <div class="bg-gray-50 p-4 border-b border-gray-200">
-                    <h3 class="text-xl font-semibold text-gray-800">Audit Summary</h3>
-                </div>
-                <div class="p-6 bg-white">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div class="text-center md:text-left">
-                            <h4 class="text-gray-500 font-medium mb-1">Overall Score</h4>
-                            <div class="text-4xl font-bold 
-                                <% if (parseFloat(overallScore) >= 80) { %>text-green-600<% } 
-                                else if (parseFloat(overallScore) >= 51) { %>text-yellow-500<% } 
-                                else { %>text-red-600<% } %>">
-                                <%= overallScore %>%
-                            </div>
-                        </div>
-                        
-                        <div class="h-16 w-px bg-gray-200 hidden md:block"></div>
-                        
-                        <div class="text-center md:text-left">
-                            <h4 class="text-gray-500 font-medium mb-1">Category</h4>
-                            <div class="px-4 py-2 rounded-full inline-flex items-center
-                                <% if (category === 'Approved') { %>bg-green-100 text-green-800<% } 
-                                else if (category === 'Needs Improvement') { %>bg-yellow-100 text-yellow-800<% } 
-                                else { %>bg-red-100 text-red-800<% } %>">
-                                <% if (category === 'Approved') { %>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-                                    </svg>
-                                <% } else if (category === 'Needs Improvement') { %>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                                    </svg>
-                                <% } else { %>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
-                                <% } %>
-                                <span class="font-medium"><%= category %></span>
-                            </div>
-                        </div>
-                        
-                        <div class="h-16 w-px bg-gray-200 hidden md:block"></div>
-                        
-                        <div class="text-center md:text-left">
-                            <h4 class="text-gray-500 font-medium mb-1">Questions</h4>
-                            <div class="text-2xl font-bold text-gray-800"><%= audit.questions.length %></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Rating Scale Legend -->
-            <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                <p class="text-gray-700 font-medium mb-2">Rating Scale:</p>
-                <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
-                    <div class="text-gray-600">0 - Not Included</div>
-                    <div class="text-gray-600">1 - Included, but no execution</div>
-                    <div class="text-gray-600">2 - Needs Improvement</div>
-                    <div class="text-gray-600">3 - Good Execution</div>
-                    <div class="text-gray-600">4 - Innovative, No Recommendations</div>
-                </div>
-            </div>
-            
-            <!-- Questions List -->
-            <div class="space-y-4">
-                <% audit.questions.forEach((question, index) => { %>
-                <div class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
-                    <div class="flex gap-2 mb-2">
-                        <span class="font-medium text-gray-700 w-8"><%= index + 1 %>.</span>
-                        <span class="text-gray-800 font-medium flex-1"><%= question.question %></span>
-                    </div>
-                    
-                    <div class="ml-8 grid md:grid-cols-3 gap-4">
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Rating:</p>
-                            <div class="flex items-center">
-                                <div class="px-3 py-1 rounded-md font-medium
-                                    <% if (parseInt(question.rating) === 4) { %>bg-green-100 text-green-800<% } 
-                                    else if (parseInt(question.rating) >= 2) { %>bg-blue-100 text-blue-800<% } 
-                                    else if (parseInt(question.rating) >= 1) { %>bg-yellow-100 text-yellow-800<% } 
-                                    else { %>bg-red-100 text-red-800<% } %>">
-                                    <%= question.rating %> / 4
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Remarks:</p>
-                            <p class="text-gray-700"><%= question.remark || "No remarks provided" %></p>
-                        </div>
-                        
-                        <div>
-                            <p class="text-sm text-gray-500 mb-1">Evidence:</p>
-                            <% if (question.proofFile) { %>
-                                <div class="flex flex-col">
-                                    <a href="<%= question.proofFile %>" target="_blank" class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition text-center text-sm mb-2 w-24">
-                                        View Proof
-                                    </a>
-                                    <img src="<%= question.proofFile %>" alt="Proof" class="w-24 h-24 rounded-md shadow-sm object-cover border border-gray-200">
-                                </div>
-                            <% } else { %>
-                                <span class="text-gray-500 italic">No evidence uploaded</span>
-                            <% } %>
-                        </div>
-                    </div>
-                </div>
-                <% }); %>
-            </div>
+      <div
+        class="bg-white shadow-xl p-6 md:p-10 rounded-2xl border border-gray-200 max-w-4xl mx-auto"
+      >
+        <!-- Header Section -->
+        <h2 class="text-3xl font-semibold text-gray-900 mb-6 text-center">
+          Supplier Audit Report
+        </h2>
+
+        <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
+          <div class="space-y-2">
+            <p class="text-gray-700">
+              <span class="font-medium">Audit ID:</span>
+              <span class="text-gray-600"><%= audit._id %></span>
+            </p>
+            <p class="text-gray-700">
+              <span class="font-medium">Date:</span>
+              <span class="text-gray-600"
+                ><%= audit.createdAt.toDateString() %></span
+              >
+            </p>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex gap-3 self-end">
+            <a
+              href="/dashboard"
+              class="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                />
+              </svg>
+              Dashboard
+            </a>
+            <a
+              href="/audit/report/pdf/<%= audit._id %>"
+              class="flex items-center bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              Download PDF
+            </a>
+          </div>
         </div>
-        
-        <!-- Footer -->
-        <div class="mt-4 text-center text-gray-500 text-sm">
-            <p>Generated on <%= new Date().toLocaleDateString() %> | <a href="/reports" class="text-blue-600 hover:underline">View All Reports</a></p>
+
+        <!-- Overall Score Card -->
+        <div class="rounded-xl overflow-hidden shadow-md mb-8">
+          <div class="bg-gray-50 p-4 border-b border-gray-200">
+            <h3 class="text-xl font-semibold text-gray-800">Audit Summary</h3>
+          </div>
+          <div class="p-6 bg-white">
+            <div
+              class="flex flex-col md:flex-row justify-between items-center gap-6"
+            >
+              <div class="text-center md:text-left">
+                <h4 class="text-gray-500 font-medium mb-1">Overall Score</h4>
+                <div
+                  class="text-4xl font-bold <% if (parseFloat(overallScore) >= 80) { %>text-green-600<% } else if (parseFloat(overallScore) >= 51) { %>text-yellow-500<% } else { %>text-red-600<% } %>"
+                >
+                  <%= overallScore %>%
+                </div>
+              </div>
+
+              <div class="h-16 w-px bg-gray-200 hidden md:block"></div>
+
+              <div class="text-center md:text-left">
+                <h4 class="text-gray-500 font-medium mb-1">Category</h4>
+                <div
+                  class="px-4 py-2 rounded-full inline-flex items-center <% if (category === 'Approved') { %>bg-green-100 text-green-800<% } else if (category === 'Needs Improvement') { %>bg-yellow-100 text-yellow-800<% } else { %>bg-red-100 text-red-800<% } %>"
+                >
+                  <% if (category === 'Approved') { %>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <% } else if (category === 'Needs Improvement') { %>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <% } else { %>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    class="h-5 w-5 mr-1"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <% } %>
+                  <span class="font-medium"><%= category %></span>
+                </div>
+              </div>
+
+              <div class="h-16 w-px bg-gray-200 hidden md:block"></div>
+
+              <div class="text-center md:text-left">
+                <h4 class="text-gray-500 font-medium mb-1">Questions</h4>
+                <div class="text-2xl font-bold text-gray-800">
+                  <%= audit.questions.length %>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Rating Scale Legend -->
+        <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-200">
+          <p class="text-gray-700 font-medium mb-2">Rating Scale:</p>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-2 text-sm">
+            <div class="text-gray-600">0 - Not Included</div>
+            <div class="text-gray-600">1 - Included, but no execution</div>
+            <div class="text-gray-600">2 - Needs Improvement</div>
+            <div class="text-gray-600">3 - Good Execution</div>
+            <div class="text-gray-600">4 - Innovative, No Recommendations</div>
+          </div>
+        </div>
+
+        <!-- Questions List -->
+        <div class="space-y-4">
+          <% audit.questions.forEach((question, index) => { %>
+          <div
+            class="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition"
+          >
+            <div class="flex gap-2 mb-2">
+              <span class="font-medium text-gray-700 w-8"
+                ><%= index + 1 %>.</span
+              >
+              <span class="text-gray-800 font-medium flex-1"
+                ><%= question.question %></span
+              >
+            </div>
+
+            <div class="ml-8 grid md:grid-cols-3 gap-4">
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Rating:</p>
+                <div class="flex items-center">
+                  <div
+                    class="px-3 py-1 rounded-md font-medium <% if (parseInt(question.rating) === 4) { %>bg-green-100 text-green-800<% } else if (parseInt(question.rating) >= 2) { %>bg-blue-100 text-blue-800<% } else if (parseInt(question.rating) >= 1) { %>bg-yellow-100 text-yellow-800<% } else { %>bg-red-100 text-red-800<% } %>"
+                  >
+                    <%= question.rating %> / 4
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Remarks:</p>
+                <p class="text-gray-700">
+                  <%= question.remark || "No remarks provided" %>
+                </p>
+              </div>
+
+              <div>
+                <p class="text-sm text-gray-500 mb-1">Evidence:</p>
+
+                <% if (question.proofFile) { %> <% const isPDF =
+                /\.(pdf)(\?.*)?$/i.test(question.proofFile); %>
+
+                <div class="flex flex-col items-center md:items-start">
+                  <a
+                    href="<%= question.proofFile %>"
+                    target="_blank"
+                    class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 transition text-center text-sm mb-2 w-24"
+                  >
+                    View Proof
+                  </a>
+
+                  <% if (isPDF) { %>
+                  <img
+                    src="/assets/pdf-icon.png"
+                    alt="PDF Icon"
+                    class="w-24 h-24 rounded-md shadow-sm object-cover border border-gray-200"
+                  />
+                  <% } else { %>
+                  <img
+                    src="<%= question.proofFile %>"
+                    alt="Proof"
+                    class="w-24 h-24 rounded-md shadow-sm object-cover border border-gray-200"
+                  />
+                  <% } %>
+                </div>
+                <% } else { %>
+                <span class="text-gray-500 italic">No evidence uploaded</span>
+                <% } %>
+              </div>
+            </div>
+          </div>
+          <% }); %>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="mt-4 text-center text-gray-500 text-sm">
+        <p>
+          Generated on <%= new Date().toLocaleDateString() %> |
+          <a href="/reports" class="text-blue-600 hover:underline"
+            >View All Reports</a
+          >
+        </p>
+      </div>
     </div>
-</body> 
+  </body>
 </html>

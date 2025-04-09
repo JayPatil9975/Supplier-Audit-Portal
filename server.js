@@ -5,6 +5,7 @@ const session = require("express-session");
 const passport = require("passport");
 const authRoutes = require("./routes/auth");
 const auditRoutes = require("./routes/audit");
+const adminRoutes = require("./routes/admin");
 
 require("./config/passport")(passport);
 
@@ -34,5 +35,9 @@ mongoose
 
 app.use("/", authRoutes);
 app.use("/audit", auditRoutes);
+
+ // adjust path
+app.use("/admin", adminRoutes);
+
 
 app.listen(3000, () => console.log("Server running on port 3000"));
