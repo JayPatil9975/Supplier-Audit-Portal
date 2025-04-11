@@ -9,6 +9,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 const router = express.Router();
 const fileType = require("file-type");
+const User = require("../models/User");
 
 // Configure Cloudinary
 cloudinary.config({
@@ -187,39 +188,45 @@ router.get("/reports", async (req, res) => {
 });
 
 router.get("/report/:auditId", async (req, res) => {
-  if (!req.isAuthenticated()) return res.redirect("/login");
+  const isUser = req.isAuthenticated();
+  const isAdmin = req.session && req.session.isAdmin;
+
+  if (!isUser && !isAdmin) return res.redirect("/login");
 
   try {
-    const audit = await Audit.findById(req.params.auditId);
+    const audit = await Audit.findById(req.params.auditId).populate("user");
     if (!audit) return res.status(404).send("Audit not found");
 
-    // ✅ Calculate total score
     const totalQuestions = audit.questions.length;
     let overallScore = "N/A";
     let category = "Not Approved";
 
     if (totalQuestions > 0) {
-      const totalPossibleScore = totalQuestions * 4; // Max rating per question = 4
+      const totalPossibleScore = totalQuestions * 4;
       const totalAchievedScore = audit.questions.reduce(
         (sum, q) => sum + (parseInt(q.rating) || 0),
         0
       );
-
       overallScore = ((totalAchievedScore / totalPossibleScore) * 100).toFixed(
         2
-      ); // Convert to percentage
+      );
 
-      // ✅ Define category based on score
       if (overallScore >= 80) category = "Approved";
       else if (overallScore >= 51) category = "Needs Improvement";
     }
 
-    res.render("audit-report", { audit, overallScore, category });
+    res.render("audit-report", {
+      audit,
+      overallScore,
+      category,
+      isAdmin: req.session.isAdmin || false, // Pass this to EJS so you can hide/show admin tools
+    });
   } catch (error) {
     console.error("Error fetching audit report:", error);
     res.status(500).send("Failed to load audit report.");
   }
 });
+
 // Route to generate and send audit PDF via email
 router.get("/report/mail/:auditId", async (req, res) => {
   if (!req.isAuthenticated()) return res.redirect("/login");
@@ -652,7 +659,8 @@ router.get("/report/mail/:auditId", async (req, res) => {
 
 // ✅ Generate & Download PDF Report
 router.get("/report/pdf/:auditId", async (req, res) => {
-  if (!req.isAuthenticated()) return res.redirect("/login");
+  if (!req.isAuthenticated() && !req.session.isAdmin)
+    return res.redirect("/login");
 
   try {
     const audit = await Audit.findById(req.params.auditId);
@@ -670,10 +678,28 @@ router.get("/report/pdf/:auditId", async (req, res) => {
     // Header info - Large text with proper spacing as shown in the image
     doc.fontSize(18).fillColor("#000000");
     doc.text(`Audit Date: ${audit.createdAt.toDateString()}`, 40, doc.y);
+    let supplierName = "N/A";
+    let auditorName = "Admin";
+
+    // If logged-in user exists
+    if (req.user && req.user.companyName && req.user.fullName) {
+      supplierName = req.user.companyName;
+      auditorName = req.user.fullName;
+    } else {
+      // Fetch supplier from DB if accessed by admin (req.user missing)
+      const supplier = await User.findById(audit.user);
+      if (supplier) {
+        supplierName = supplier.companyName;
+        auditorName = "Admin (on behalf of " + supplier.fullName + ")";
+      }
+    }
+
+    // 👇 PDF content using safe data
     doc.moveDown(0.5);
-    doc.text(`Supplier: ${req.user.companyName}`, 40, doc.y);
+    doc.text(`Supplier: ${supplierName}`, 40, doc.y);
     doc.moveDown(0.5);
-    doc.text(`Auditor: ${req.user.fullName}`, 40, doc.y);
+    doc.text(`Auditor: ${auditorName}`, 40, doc.y);
+    doc.moveDown(4);
 
     // Large gap before score
     doc.moveDown(4);

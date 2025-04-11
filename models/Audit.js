@@ -10,6 +10,16 @@ const AuditSchema = new mongoose.Schema({
       remark: String,
     },
   ],
+  adminRemarks: [
+    {
+      text: String,
+      createdAt: { type: Date, default: Date.now }
+    }
+  ],
+  assignedByAdmin: {
+    type: Boolean,
+    default: false,
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

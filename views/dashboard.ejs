@@ -1,103 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body class="bg-gray-100 flex flex-col min-h-screen">
+    <script></script>
+  </head>
+  <body class="bg-gray-100 flex flex-col min-h-screen">
     <!-- Navbar -->
     <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+        <!-- Left logo -->
         <div class="flex items-center">
-            <img src="/assets/sup-image.0eed1e84cc2c415f47c5.png" alt="Supplier Portal Logo" class="h-8 mr-2">
-            <span class="text-lg font-semibold text-gray-800">Supplier Portal</span>
+          <img
+            src="/assets/sup-image.0eed1e84cc2c415f47c5.png"
+            alt="Supplier Portal Logo"
+            class="h-8 mr-2"
+          />
+          <span class="text-lg font-semibold text-gray-800">Supplier Portal</span>
         </div>
-        <div class="flex items-center space-x-4">
-            <span class="text-gray-600 font-medium"><%= user.fullName %> | <%= user.companyName %></span>
-            <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Logout</a>
+      
+        <!-- Right section -->
+        <div class="flex items-center space-x-6">
+          <!-- 🔔 Notification Dropdown -->
+          <div class="relative notification-icon">
+            <!-- Trigger Button -->
+            <button id="notification-btn" class="relative flex items-center focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700 hover:text-blue-600" fill="none"
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002
+                     6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6
+                     11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0
+                     11-6 0v-1m6 0H9" />
+              </svg>
+              <!-- 🔴 Red Badge -->
+              <span id="notification-dot" class="absolute -top-1 -right-1 h-2 w-2 bg-red-600 rounded-full animate-ping"></span>
+              <span id="notification-dot-fill" class="absolute -top-1 -right-1 h-2 w-2 bg-red-600 rounded-full"></span>
+            </button>
+      
+            <!-- Dropdown -->
+            <div id="notification-dropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-xl z-50 p-4">
+              <p class="text-lg font-semibold border-b pb-2 mb-3 flex items-center gap-2">
+                <span>🔔</span> <span>Admin Remarks</span>
+              </p>
+              <ul class="space-y-3 max-h-72 overflow-y-auto pr-2">
+                <% if (remarks.length === 0) { %>
+                  <li class="text-gray-500 text-sm italic text-center">No remarks available.</li>
+                <% } else { %>
+                  <% remarks.forEach(function(r) { %>
+                    <li class="bg-gray-50 border-l-4 border-blue-500 p-3 rounded-md shadow-sm">
+                      <div class="text-sm text-gray-800 mb-1"><%= r.text %></div>
+                      <div class="text-xs text-gray-500 text-right"><%= new Date(r.createdAt).toLocaleDateString() %></div>
+                    </li>
+                  <% }); %>
+                <% } %>
+              </ul>
+            </div>
+          </div>
+      
+          <!-- User info and Logout -->
+          <span class="text-gray-600 font-medium"><%= user.fullName %> | <%= user.companyName %></span>
+          <a href="/logout" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">Logout</a>
         </div>
-    </nav>
+      </nav>
+      
 
     <!-- Main Content -->
     <main class="flex-1 max-w-6xl mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-2 text-gray-800">Welcome to your Dashboard</h1>
-        <p class="text-gray-600 mb-6">Manage your quality assessments and view audit reports.</p>
+      <h1 class="text-2xl font-bold mb-2 text-gray-800">
+        Welcome to your Dashboard
+      </h1>
+      <p class="text-gray-600 mb-6">
+        Manage your quality assessments and view audit reports.
+      </p>
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 shadow-md rounded-lg border border-gray-300">
-                <h2 class="text-gray-500 text-lg">Total Audits</h2>
-                <p class="text-3xl font-bold text-gray-800"><%= totalAudits %></p>
-                <a href="/audit/form" class="text-blue-600 hover:underline">Start new audit</a>
-            </div>
-            <div class="bg-white p-6 shadow-md rounded-lg border border-gray-300">
-                <h2 class="text-gray-500 text-lg">Latest Score</h2>
-                <p class="text-3xl font-bold text-gray-800"><%= latestScore %></p>
-                <% if (latestAuditId) { %>
-                    <a href="/audit/report/<%= latestAuditId %>" class="text-blue-600 hover:underline">View details</a>
-                <% } else { %>
-                    <span class="text-gray-400">No audits yet</span>
-                <% } %>
-            </div>
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        <div class="bg-white p-6 shadow-md rounded-lg border border-gray-300">
+          <h2 class="text-gray-500 text-lg">Total Audits</h2>
+          <p class="text-3xl font-bold text-gray-800"><%= totalAudits %></p>
+          <a href="/audit/form" class="text-blue-600 hover:underline"
+            >Start new audit</a
+          >
         </div>
+        <div class="bg-white p-6 shadow-md rounded-lg border border-gray-300">
+          <h2 class="text-gray-500 text-lg">Latest Score</h2>
+          <p class="text-3xl font-bold text-gray-800"><%= latestScore %></p>
+          <% if (latestAuditId) { %>
+          <a
+            href="/audit/report/<%= latestAuditId %>"
+            class="text-blue-600 hover:underline"
+            >View details</a
+          >
+          <% } else { %>
+          <span class="text-gray-400">No audits yet</span>
+          <% } %>
+        </div>
+      </div>
 
-        <!-- Graph Visualization -->
-        <div class="bg-white p-6 mt-8 shadow-md rounded-lg border border-gray-300">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Audit Score Trend</h2>
-            <canvas id="auditChart"></canvas>
-        </div>
+      <!-- Graph Visualization -->
+      <div
+        class="bg-white p-6 mt-8 shadow-md rounded-lg border border-gray-300"
+      >
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">
+          Audit Score Trend
+        </h2>
+        <canvas id="auditChart"></canvas>
+      </div>
 
-        <!-- Quick Actions -->
-        <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div class="bg-blue-600 text-white p-6 rounded-lg shadow-md transition hover:bg-blue-700">
-                <h2 class="text-lg font-bold">Quality Audit Form</h2>
-                <p class="text-sm mb-4">Complete your quality assessment to evaluate supplier performance.</p>
-                <a href="/audit/form" class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-200 transition">
-                    Start Audit
-                </a>
-            </div>
-            <div class="bg-green-600 text-white p-6 rounded-lg shadow-md transition hover:bg-green-700">
-                <h2 class="text-lg font-bold">Audit Reports</h2>
-                <p class="text-sm mb-4">View and download your previous audit reports and results.</p>
-                <a href="/audit/reports" class="bg-white text-green-600 px-4 py-2 rounded hover:bg-gray-200 transition">
-                    View Reports
-                </a>
-            </div>
+      <!-- Quick Actions -->
+      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div
+          class="bg-blue-600 text-white p-6 rounded-lg shadow-md transition hover:bg-blue-700"
+        >
+          <h2 class="text-lg font-bold">Quality Audit Form</h2>
+          <p class="text-sm mb-4">
+            Complete your quality assessment to evaluate supplier performance.
+          </p>
+          <a
+            href="/audit/form"
+            class="bg-white text-blue-600 px-4 py-2 rounded hover:bg-gray-200 transition"
+          >
+            Start Audit
+          </a>
         </div>
+        <div
+          class="bg-green-600 text-white p-6 rounded-lg shadow-md transition hover:bg-green-700"
+        >
+          <h2 class="text-lg font-bold">Audit Reports</h2>
+          <p class="text-sm mb-4">
+            View and download your previous audit reports and results.
+          </p>
+          <a
+            href="/audit/reports"
+            class="bg-white text-green-600 px-4 py-2 rounded hover:bg-gray-200 transition"
+          >
+            View Reports
+          </a>
+        </div>
+      </div>
     </main>
 
     <!-- Sticky Footer -->
     <footer class="p-4 text-center text-gray-500 bg-white shadow-md mt-auto">
-        © 2025 Supplier Quality Management Portal. All rights reserved.
+      © 2025 Supplier Quality Management Portal. All rights reserved.
     </footer>
 
     <!-- Chart.js Script -->
     <script>
-        const auditData = <%- JSON.stringify(auditData) %>;
+      const auditData = <%- JSON.stringify(auditData) %>;
 
-        const ctx = document.getElementById('auditChart').getContext('2d');
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: auditData.map(audit => audit.date),
-                datasets: [{
-                    label: 'Audit Scores (%)',
-                    data: auditData.map(audit => audit.score),
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                    borderWidth: 2,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: { beginAtZero: true, max: 100 }
-                }
+      const ctx = document.getElementById('auditChart').getContext('2d');
+      new Chart(ctx, {
+          type: 'line',
+          data: {
+              labels: auditData.map(audit => audit.date),
+              datasets: [{
+                  label: 'Audit Scores (%)',
+                  data: auditData.map(audit => audit.score),
+                  borderColor: 'rgb(75, 192, 192)',
+                  backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                  borderWidth: 2,
+                  fill: true
+              }]
+          },
+          options: {
+              responsive: true,
+              scales: {
+                  y: { beginAtZero: true, max: 100 }
+              }
+          }
+      });
+
+
+     
+        document.addEventListener("DOMContentLoaded", () => {
+          const btn = document.getElementById("notification-btn");
+          const dropdown = document.getElementById("notification-dropdown");
+      
+          btn.addEventListener("click", () => {
+            dropdown.classList.toggle("hidden");
+          });
+      
+          document.addEventListener("click", (e) => {
+            if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+              dropdown.classList.add("hidden");
             }
+          });
         });
+      
+      
     </script>
-</body>
+  </body>
 </html>

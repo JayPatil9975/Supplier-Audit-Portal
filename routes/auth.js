@@ -23,8 +23,12 @@ function ensureAuthenticated(req, res, next) {
 }
 
 // ✅ Render login & signup pages (Only for guests)
-router.get("/login", ensureGuest, (req, res) => res.render("login", { error: req.query.error || null }));
-router.get("/signup", ensureGuest, (req, res) => res.render("signup", { error: null }));
+router.get("/login", ensureGuest, (req, res) =>
+  res.render("login", { error: req.query.error || null })
+);
+router.get("/signup", ensureGuest, (req, res) =>
+  res.render("signup", { error: null })
+);
 
 // ✅ Handle user registration
 router.post("/signup", async (req, res) => {
@@ -36,7 +40,9 @@ router.post("/signup", async (req, res) => {
   }
 
   if (password.length < 6) {
-    return res.render("signup", { error: "Password must be at least 6 characters long!" });
+    return res.render("signup", {
+      error: "Password must be at least 6 characters long!",
+    });
   }
 
   if (password !== confirmPassword) {
@@ -66,10 +72,11 @@ router.post("/signup", async (req, res) => {
 
     // Redirect to Login Page after successful signup
     res.redirect("/login");
-
   } catch (err) {
     console.error("❌ Signup Error:", err);
-    res.render("signup", { error: "Registration failed. Please try again later." });
+    res.render("signup", {
+      error: "Registration failed. Please try again later.",
+    });
   }
 });
 
@@ -94,11 +101,12 @@ router.get("/logout", (req, res, next) => {
 });
 
 // ✅ Dashboard route (Requires authentication)
-// ✅ Dashboard route (Requires authentication)
 router.get("/dashboard", ensureAuthenticated, async (req, res) => {
   try {
-    // Fetch user audits
-    const audits = await Audit.find({ user: req.user._id }).sort({ createdAt: 1 });
+    const audits = await Audit.find({ user: req.user._id }).sort({
+      createdAt: 1,
+    });
+
     const totalAudits = audits.length;
     let latestScore = "N/A";
     let latestAuditId = null;
@@ -107,32 +115,71 @@ router.get("/dashboard", ensureAuthenticated, async (req, res) => {
     if (audits.length > 0) {
       const lastAudit = audits[audits.length - 1];
       latestAuditId = lastAudit._id;
-      const totalQuestions = lastAudit.questions.length;
 
-      if (totalQuestions > 0) {
-        const totalPossibleScore = totalQuestions * 4;
-        const totalAchievedScore = lastAudit.questions.reduce((sum, q) => sum + parseInt(q.rating || 0), 0);
-        latestScore = ((totalAchievedScore / totalPossibleScore) * 100).toFixed(1) + "%";
-      } else {
-        latestScore = "0%";
-      }
+      const totalQuestions = lastAudit.questions.length;
+      const totalPossibleScore = totalQuestions * 4;
+      const totalAchievedScore = lastAudit.questions.reduce(
+        (sum, q) => sum + parseInt(q.rating || 0),
+        0
+      );
+      latestScore =
+        totalQuestions > 0
+          ? ((totalAchievedScore / totalPossibleScore) * 100).toFixed(1) + "%"
+          : "0%";
     }
 
-    // Prepare audit data for graph
-    auditData = audits.map(audit => ({
+    // 📊 Prepare audit data for graph
+    auditData = audits.map((audit) => ({
       date: audit.createdAt.toDateString(),
-      score: (audit.questions.reduce((sum, q) => sum + parseInt(q.rating || 0), 0) / (audit.questions.length * 4) * 100).toFixed(1)
+      score: (
+        (audit.questions.reduce((sum, q) => sum + parseInt(q.rating || 0), 0) /
+          (audit.questions.length * 4)) *
+        100
+      ).toFixed(1),
     }));
 
-    const lastAuditDate = audits.length > 0 ? audits[audits.length - 1].createdAt.toDateString() : "N/A";
-    res.render("dashboard", { user: req.user, totalAudits, latestScore, lastAuditDate, latestAuditId, audits, auditData });
+    const lastAuditDate =
+      audits.length > 0
+        ? audits[audits.length - 1].createdAt.toDateString()
+        : "N/A";
+
+    // 🔔 Collect all admin remarks from all audits, flatten and sort them
+    const remarks = audits
+      .flatMap((a) =>
+        (a.adminRemarks || []).map((r) => ({
+          text: r.text,
+          createdAt: r.createdAt,
+        }))
+      )
+      .filter((r) => r.text && r.text.trim() !== "")
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    // ✅ Render dashboard
+    res.render("dashboard", {
+      user: req.user,
+      totalAudits,
+      latestScore,
+      lastAuditDate,
+      latestAuditId,
+      audits,
+      auditData,
+      remarks, // Pass to EJS
+      unreadCount: remarks.filter(r => !r.read).length,
+    });
   } catch (error) {
     console.error("Error loading dashboard:", error);
-    res.render("dashboard", { user: req.user, totalAudits: 0, latestScore: "N/A", lastAuditDate: "N/A", latestAuditId: null, audits: [], auditData: [] });
+    res.render("dashboard", {
+      user: req.user,
+      totalAudits: 0,
+      latestScore: "N/A",
+      lastAuditDate: "N/A",
+      latestAuditId: null,
+      audits: [],
+      auditData: [],
+      remarks: [],
+      unreadCount: remarks.filter(r => !r.read).length,
+    });
   }
 });
-
-
-
 
 module.exports = router;

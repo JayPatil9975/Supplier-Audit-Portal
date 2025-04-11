@@ -4,43 +4,59 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Admin Dashboard</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 min-h-screen">
-  <header class="bg-blue-700 text-white p-4 flex justify-between items-center">
-    <h1 class="text-xl font-semibold">Admin Dashboard</h1>
-    <a href="/admin/logout" class="text-sm underline hover:text-gray-200">Logout</a>
-  </header>
+<body class="bg-gray-100 min-h-screen">
+  <!-- Header -->
+  <nav class="bg-white p-4 shadow flex justify-between items-center">
+    <h1 class="text-xl font-bold text-gray-800">Admin Dashboard</h1>
+    <a href="/admin/logout" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Logout</a>
+  </nav>
 
-  <main class="p-6">
-    <h2 class="text-2xl font-bold mb-4 text-gray-800">Submitted Audits</h2>
+  <div class="max-w-7xl mx-auto py-8 px-4">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">All Supplier Audits</h2>
 
     <% if (audits.length === 0) { %>
       <p class="text-gray-500">No audits found.</p>
     <% } else { %>
-      <div class="overflow-x-auto">
-        <table class="min-w-full bg-white shadow rounded-lg overflow-hidden">
-          <thead class="bg-gray-100">
+      <div class="overflow-x-auto bg-white shadow-md rounded-lg border border-gray-200">
+        <table class="min-w-full table-auto">
+          <thead class="bg-blue-100 text-blue-800">
             <tr>
-              <th class="text-left px-4 py-2">#</th>
-              <th class="text-left px-4 py-2">User</th>
-              <th class="text-left px-4 py-2">Total Questions</th>
-              <th class="text-left px-4 py-2">Submitted On</th>
+              <th class="px-4 py-3 border">Supplier</th>
+              <th class="px-4 py-3 border">Date</th>
+              <th class="px-4 py-3 border">Score</th>
+              <th class="px-4 py-3 border">Category</th>
+              <th class="px-4 py-3 border">Actions</th>
             </tr>
           </thead>
-          <tbody>
-            <% audits.forEach((audit, index) => { %>
-              <tr class="border-t">
-                <td class="px-4 py-2"><%= index + 1 %></td>
-                <td class="px-4 py-2"><%= audit.user %></td>
-                <td class="px-4 py-2"><%= audit.questions.length %></td>
-                <td class="px-4 py-2"><%= new Date(audit.createdAt).toLocaleString() %></td>
+          <tbody class="text-gray-700">
+            <% audits.forEach((audit) => { 
+                const totalQuestions = audit.questions.length;
+                const totalScore = audit.questions.reduce((sum, q) => sum + parseInt(q.rating || 0), 0);
+                const maxScore = totalQuestions * 4;
+                const scorePercent = ((totalScore / maxScore) * 100).toFixed(1);
+                let category = "Not Approved";
+                if (scorePercent >= 80) category = "Approved";
+                else if (scorePercent >= 51) category = "Needs Improvement";
+            %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-3 border"><%= audit.user?.companyName || "N/A" %></td>
+                <td class="px-4 py-3 border"><%= new Date(audit.createdAt).toDateString() %></td>
+                <td class="px-4 py-3 border font-bold"><%= scorePercent %> %</td>
+                <td class="px-4 py-3 border"><%= category %></td>
+                <td class="px-4 py-3 border space-x-2">
+                  <a href="/audit/report/<%= audit._id %>" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">View</a>
+                  <a href="/admin/audit/<%= audit._id %>/remarks" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition">
+                    Add Remarks
+                  </a>
+                </td>
               </tr>
             <% }); %>
           </tbody>
         </table>
       </div>
     <% } %>
-  </main>
+  </div>
 </body>
 </html>
